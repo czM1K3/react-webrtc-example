@@ -13,6 +13,7 @@ export const useFirstClient = () => {
 	const [status, setStatus] = useState(Status.TryingConnect);
 
 	const incomming = (remoteId: string, type: string, message: string) => {
+		console.log(`Got message. Type "${type}". Message: ${message}`);
 		switch (type) {
 			case "get": {
 				setSecondId(remoteId);
@@ -67,6 +68,7 @@ export const useFirstClient = () => {
 		else alert("Ice candidate is missing "+iceCandidate);
 	}, [secondId]);
 
+	// Is it needed?
 	useEffect(() => {
 		if (secondId !== "" && iceCandidate)
 			sendMessage(secondId, "offer", iceCandidate);

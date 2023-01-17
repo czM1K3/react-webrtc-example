@@ -12,6 +12,7 @@ export const useSecondClient = (firstId: string) => {
 	const [status, setStatus] = useState(Status.TryingConnect);
 
 	const incomming = (_remoteId: string, type: string, message: string) => {
+		console.log(`Got message. Type "${type}". Message: ${message}`);
 		switch (type) {
 			case "offer": {
 				setFirstIceCandidate(message);
