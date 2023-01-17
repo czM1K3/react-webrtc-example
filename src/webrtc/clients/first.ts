@@ -68,6 +68,11 @@ export const useFirstClient = () => {
 	}, [secondId]);
 
 	useEffect(() => {
+		if (secondId !== "" && iceCandidate)
+			sendMessage(secondId, "offer", iceCandidate);
+	}, [iceCandidate]);
+
+	useEffect(() => {
 		if (secondIceCandidate === "" || !rtc) return;
 		rtc.setRemoteDescription(JSON.parse(secondIceCandidate));
 	}, [secondIceCandidate]);
