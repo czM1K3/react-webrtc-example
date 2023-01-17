@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { config } from "../config";
 import { useSocketIO } from "../socketio";
 import { Status } from "../status";
 
@@ -32,7 +33,7 @@ export const useSecondClient = (firstId: string) => {
 	} = useSocketIO(incomming);
 
 	const initRtc = () => {
-		const rtcConnection = new RTCPeerConnection();
+		const rtcConnection = new RTCPeerConnection(config);
 		rtcConnection.onicecandidate = () => {
 			setIceCandidate(JSON.stringify(rtcConnection.localDescription));
 		};
