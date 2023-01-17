@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { z } from "zod";
 
-const socket = io("http://localhost:3000");
+const socket = io(import.meta.env.VITE_SOCKETIO_URL ?? "http://localhost:3000");
 
 const messageSchema = z.object({
 	sourceId: z.string(),
@@ -10,7 +10,9 @@ const messageSchema = z.object({
 	type: z.string(),
 });
 
-export const useSocketIO = (receiveHandler: (remoteId: string, type: string, message: string) => void) => {
+export const useSocketIO = (
+	receiveHandler: (remoteId: string, type: string, message: string) => void
+) => {
 	const [isConnected, setIsConnected] = useState(socket.connected);
 	const [id, setId] = useState<string>("");
 
