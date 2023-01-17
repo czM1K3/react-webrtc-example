@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSocketIO } from "../socketio";
+import { Status } from "../status";
 
 export const useSecondClient = (firstId: string) => {
 	const [rtc, setRtc] = useState<RTCPeerConnection>();
@@ -7,6 +8,7 @@ export const useSecondClient = (firstId: string) => {
 	const [iceCandidate, setIceCandidate] = useState<string | null>(null);
 	const [connected, setConnected] = useState(false);
 	const [firstIceCandidate, setFirstIceCandidate] = useState("");
+	const [status, setStatus] = useState(Status.TryingConnect);
 
 	const incomming = (_remoteId: string, type: string, message: string) => {
 		switch (type) {
@@ -29,7 +31,7 @@ export const useSecondClient = (firstId: string) => {
 		open
 	} = useSocketIO(incomming);
 
-	useEffect(() => {
+	const initRtc = () => {
 		const rtcConnection = new RTCPeerConnection();
 		rtcConnection.onicecandidate = () => {
 			setIceCandidate(JSON.stringify(rtcConnection.localDescription));
@@ -45,7 +47,11 @@ export const useSecondClient = (firstId: string) => {
 		};
 
 		setRtc(rtcConnection);
+		return { rtcConnection };
+	}
 
+	useEffect(() => {
+		const { rtcConnection } = initRtc();
 		return () => {
 			rtcConnection.close();
 		};
@@ -71,9 +77,23 @@ export const useSecondClient = (firstId: string) => {
 			close();
 		} else {
 			setFirstIceCandidate("");
+			setIceCandidate("");
+			rtc?.close();
+			initRtc();
 			open();
 		}
 	}, [connected]);
+
+	useEffect(() => {
+		if (connected)
+			setStatus(Status.Connected);
+		else if (!connected && firstId)
+			setStatus(Status.Connecting);
+		else if (!connected && socketioConnected)
+			setStatus(Status.Waiting);
+		else
+			setStatus(Status.TryingConnect);
+	}, [connected, socketioConnected, firstId]);
 
 	const send = (data: string) => {
 		channel?.send(data);
@@ -85,5 +105,6 @@ export const useSecondClient = (firstId: string) => {
 		iceCandidate,
 		connected,
 		send,
+		status,
 	};
 };
