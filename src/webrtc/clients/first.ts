@@ -32,6 +32,7 @@ export const useFirstClient = () => {
 	const { id, isConnected: socketioConnected, sendMessage, close, open } = useSocketIO(incomming);
 
 	const initRtc = () => {
+		console.log("Creating new RTC connection");
 		const rtcConnection = new RTCPeerConnection(config);
 		rtcConnection.onicecandidate = () => {
 			setIceCandidate(JSON.stringify(rtcConnection.localDescription));
@@ -54,10 +55,9 @@ export const useFirstClient = () => {
 	}
 
 	useEffect(() => {
-		const { channel, rtcConnection } = initRtc();
 		return () => {
-			channel.close();
-			rtcConnection.close();
+			channel?.close();
+			rtc?.close();
 		};
 	}, []);
 
