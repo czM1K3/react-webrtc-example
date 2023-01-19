@@ -2,14 +2,16 @@ import { useState, useEffect } from "react";
 import { config } from "../config";
 import { useSocketIO } from "../socketio";
 import { Status } from "../status";
+import { CallBackMessage } from "../types";
 
-export const useSecondClient = (firstId: string) => {
+export const useSecondClient = (firstId: string, callback: CallBackMessage) => {
 	const [rtc, setRtc] = useState<RTCPeerConnection>();
 	const [channel, setChannel] = useState<RTCDataChannel>();
 	const [iceCandidate, setIceCandidate] = useState<string | null>(null);
 	const [connected, setConnected] = useState(false);
 	const [firstIceCandidate, setFirstIceCandidate] = useState("");
 	const [status, setStatus] = useState(Status.TryingConnect);
+	const [iceInterval, setIceInterval] = useState<number>(0);
 
 	const incomming = (_remoteId: string, type: string, message: string) => {
 		switch (type) {
@@ -41,10 +43,9 @@ export const useSecondClient = (firstId: string) => {
 			channel.onopen = () => setConnected(true);
 			channel.onclose = () => setConnected(false);
 			channel.onmessage = ({ data }: { data: string }) => {
-				console.log(data);
+				callback(data);
 			};
 			setChannel(channel);
-			// rtcConnection.channel = channel;
 		};
 
 		setRtc(rtcConnection);
@@ -52,9 +53,9 @@ export const useSecondClient = (firstId: string) => {
 	}
 
 	useEffect(() => {
-		const { rtcConnection } = initRtc();
 		return () => {
-			rtcConnection.close();
+			channel?.close();
+			rtc?.close();
 		};
 	}, []);
 
@@ -70,7 +71,14 @@ export const useSecondClient = (firstId: string) => {
 
 	useEffect(() => {
 		if (!iceCandidate) return;
-		sendMessage(firstId, "answer", iceCandidate);
+		if (iceInterval) {
+			clearInterval(iceInterval);
+			setIceInterval(0);
+		}
+		const int = setInterval(() => {
+			sendMessage(firstId, "answer", iceCandidate);
+		}, 1000);
+		setIceInterval(int);
 	}, [iceCandidate]);
 
 	useEffect(() => {

@@ -2,8 +2,9 @@ import { useState, useEffect} from "react";
 import { config } from "../config";
 import { useSocketIO } from "../socketio";
 import { Status } from "../status";
+import { CallBackMessage } from "../types";
 
-export const useFirstClient = () => {
+export const useFirstClient = (callback: CallBackMessage) => {
 	const [rtc, setRtc] = useState<RTCPeerConnection>();
 	const [channel, setChannel] = useState<RTCDataChannel>();
 	const [iceCandidate, setIceCandidate] = useState<string | null>(null);
@@ -40,7 +41,7 @@ export const useFirstClient = () => {
 		channel.onopen = () => setConnected(true);
 		channel.onclose = () => setConnected(false);
 		channel.onmessage = ({ data }: { data: string }) => {
-			console.log(data);
+			callback(data);
 		};
 
 		rtcConnection.createOffer().then((o) => rtcConnection.setLocalDescription(o));
@@ -54,10 +55,9 @@ export const useFirstClient = () => {
 	}
 
 	useEffect(() => {
-		const { channel, rtcConnection } = initRtc();
 		return () => {
-			channel.close();
-			rtcConnection.close();
+			channel?.close();
+			rtc?.close();
 		};
 	}, []);
 
