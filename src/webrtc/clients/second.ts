@@ -77,7 +77,7 @@ export const useSecondClient = (firstId: string, callback: CallBackMessage) => {
 		}
 		const int = setInterval(() => {
 			sendMessage(firstId, "answer", iceCandidate);
-		}, 1000);
+		}, 2500);
 		setIceInterval(int);
 	}, [iceCandidate]);
 
