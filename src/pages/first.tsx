@@ -1,4 +1,5 @@
 import { FC, useState } from "react";
+import QRCode from "react-qr-code";
 import { useFirstClient } from "../webrtc/clients/first";
 
 const First: FC = () => {
@@ -20,6 +21,11 @@ const First: FC = () => {
 			<h1>First</h1>
 			<div>Status: {status}</div>
 			<div>Id: {id ?? "-"}</div>
+			{id && (
+				<div>
+					<QRCode value={id} />
+				</div>
+			)}
 			<button disabled={status !== "connected"} onClick={add}>{num}</button>
 		</div>
 	);
